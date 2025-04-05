@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account',
+    'path',
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
@@ -152,3 +154,5 @@ CORS_ALLOW_CREDENTIALS = True
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+
+GROQ_API_KEY = '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'
