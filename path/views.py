@@ -36,7 +36,7 @@ class LLMLearningPathGenerator:
     def __init__(self, 
                  diagnostic_data: Union[Dict, str],
                  api_key: Optional[str] = None,
-                 model: str = "llama3-70b-8192"):
+                 model: str = "deepseek-r1-distill-qwen-32b"):
         """
         Initialize the LLM learning path generator.
         """
@@ -602,6 +602,31 @@ class LearningPathView(APIView):
             # Generate learning path using LLM
             generator = LLMLearningPathGenerator(diagnostic_data)
             learning_path = generator.generate_learning_path()
+
+            # Ensure the learning path has the required structure
+            if 'topics' not in learning_path:
+                # Add default topics based on diagnostic results
+                subjects_performance = {}
+                for q in diagnostic_data['questions']:
+                    subject = q['subject']
+                    if subject not in subjects_performance:
+                        subjects_performance[subject] = {'correct': 0, 'total': 0}
+                    subjects_performance[subject]['total'] += 1
+                    if q['correct']:
+                        subjects_performance[subject]['correct'] += 1
+
+                learning_path['topics'] = []
+                for subject, perf in subjects_performance.items():
+                    score = (perf['correct'] / perf['total']) if perf['total'] > 0 else 0
+                    difficulty = 'basic' if score < 0.6 else 'intermediate' if score < 0.8 else 'advanced'
+                    
+                    learning_path['topics'].append({
+                        'title': f"{subject} Fundamentals",
+                        'subject': subject,
+                        'difficulty': difficulty,
+                        'objectives': [f"Master core concepts in {subject}"],
+                        'description': f"Comprehensive coverage of {subject} fundamentals"
+                    })
 
             # Save to database
             learning_path_obj = LearningPath.objects.create(

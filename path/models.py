@@ -1,11 +1,16 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 
-# Create your models here.
+User = get_user_model()
+
 class LearningPath(models.Model):
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # User model (or Student model if separate)
-    path_data = models.JSONField()  # Save the learning path as JSON
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    path_data = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
     
     def __str__(self):
-        return f"Learning Path for {self.student.username} at {self.created_at}"
+        return f"Learning Path for {self.student.username}"

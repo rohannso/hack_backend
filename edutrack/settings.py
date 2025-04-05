@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account',
     'path',
+    'tasks',
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
@@ -155,4 +156,57 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 
-GROQ_API_KEY = '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'
+# LLM Service Configuration
+GROQ_API_KEY = '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'  # Replace with your actual API key
+GROQ_API_BASE = 'https://api.groq.com/v1'  # Replace with actual base URL if different
+
+# Task Generation Settings
+TASK_GENERATION = {
+    'DEFAULT_DUE_DAYS': 7,
+    'MAX_TASKS_PER_TOPIC': 3,
+    'DIFFICULTY_DISTRIBUTION': {
+        'easy': 0.3,
+        'medium': 0.5,
+        'hard': 0.2
+    },
+    'TASK_TYPE_DISTRIBUTION': {
+        'quiz': 0.4,
+        'assignment': 0.4,
+        'interactive': 0.2
+    }
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'tasks': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# Create logs directory if it doesn't exist
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
