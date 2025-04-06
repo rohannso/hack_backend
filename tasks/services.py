@@ -213,7 +213,7 @@ class TaskGenerator:
                             {'id': 4, 'text': 'Final step', 'correct_position': 4}
                         ],
                         'feedback': {
-                            'success': 'Great job! You've mastered the sequence.',
+                            'success': 'Great job! You have mastered the sequence.',
                             'partial': 'Almost there! Review the order once more.',
                             'failure': 'Review the process and try again.'
                         }

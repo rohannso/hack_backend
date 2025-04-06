@@ -176,6 +176,9 @@ TASK_GENERATION = {
     }
 }
 
+# YouTube API Configuration
+YOUTUBE_API_KEY = 'AIzaSyB0EKhBkisYaUrkPJXZflU9QRSWNCkqWdE'  # Replace with your actual API key
+
 # Logging configuration
 LOGGING = {
     'version': 1,

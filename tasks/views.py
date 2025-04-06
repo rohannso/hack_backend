@@ -14,6 +14,8 @@ from .models import Task, StudentTask, Progress, Badge, StudentBadge, StudentPoi
 from path.models import LearningPath
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from googleapiclient.discovery import build
+from duckduckgo_search import DDGS
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -320,3 +322,72 @@ def get_student_monthly_report(request):
             report['subject_performance'][subject].pop('scores')  # Remove raw scores
     
     return Response(report)
+
+@api_view(['GET'])
+def get_learning_resources(request, learning_path_id):
+    """
+    Get YouTube videos and tutorial links for a learning path's recommended topics.
+    """
+    try:
+        # Get the learning path
+        learning_path = get_object_or_404(LearningPath, id=learning_path_id)
+        
+        # Extract recommended topics from learning path
+        recommended_topics = learning_path.path_data.get('recommended_topics', [])
+        
+        if not recommended_topics:
+            return Response({
+                'error': 'No recommended topics found in learning path'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Initialize YouTube API
+        youtube = build('youtube', 'v3', developerKey=settings.YOUTUBE_API_KEY)
+        
+        results = {}
+        for topic in recommended_topics:
+            # Search YouTube
+            youtube_request = youtube.search().list(
+                q=topic,
+                part="snippet",
+                maxResults=3,
+                type="video"
+            )
+            youtube_response = youtube_request.execute()
+            
+            youtube_videos = [{
+                'title': item['snippet']['title'],
+                'url': f"https://www.youtube.com/watch?v={item['id']['videoId']}",
+                'description': item['snippet']['description']
+            } for item in youtube_response['items']]
+            
+            # Search DuckDuckGo
+            tutorials = []
+            with DDGS() as ddgs:
+                ddg_results = ddgs.text(f"{topic} tutorial", max_results=3)
+                tutorials = [{
+                    'title': result['title'],
+                    'url': result['href'],
+                    'description': result['body']
+                } for result in ddg_results]
+            
+            results[topic] = {
+                'youtube_videos': youtube_videos,
+                'tutorials': tutorials
+            }
+        
+        return Response({
+            'learning_path_id': learning_path_id,
+            'resources': results
+        }, status=status.HTTP_200_OK)
+        
+    except LearningPath.DoesNotExist:
+        return Response({
+            'error': 'Learning path not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        logger.error(f"Error fetching learning resources: {str(e)}")
+        return Response({
+            'error': 'Failed to fetch learning resources',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

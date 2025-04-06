@@ -15,4 +15,5 @@ urlpatterns = [
     path('create-tasks/', views.create_tasks_for_learning_path, name='create-tasks'),
     path('weekly-report/', views.get_student_weekly_report, name='weekly-report'),
     path('monthly-report/', views.get_student_monthly_report, name='monthly-report'),
+    path('learning-resources/<int:learning_path_id>/', views.get_learning_resources, name='learning-resources'),
 ]
